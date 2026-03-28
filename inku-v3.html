@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>INKU — Anime & Manga</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --rose:#D02886;--violet:#54218E;--pink:#FF3399;--pink2:#FF5FB3;--pur2:#9966CC;
+  --grad:linear-gradient(135deg,#D02886,#54218E);
+  --grad2:linear-gradient(135deg,#FF3399,#54218E);
+  --grad3:linear-gradient(135deg,#FF5FB3,#9966CC);
+  --bg:#08080F;--bg2:#0E0E1A;--card:#131320;--elev:#1A1A2E;
+  --t:#F0F0FC;--t2:#B0B0D0;--t3:#606080;--brd:rgba(208,40,134,.15);--r:14px;
+}
+[data-theme=light]{
+  --bg:#F4F4FA;--bg2:#EBEBF5;--card:#fff;--elev:#E2E2F0;
+  --t:#0A0A18;--t2:#444465;--t3:#8888AA;--brd:rgba(84,33,142,.12);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);cursor:none;transition:background .4s,color .4s;overflow-x:hidden;}
+a{text-decoration:none;color:inherit;}
+img{display:block;width:100%;height:100%;object-fit:cover;}
+
+/* SPLASH */
+.splash{position:fixed;inset:0;z-index:99999;background:#04040A;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;transition:opacity .7s ease;}
+.splash.hide{opacity:0;pointer-events:none;}
+.sp-logo{font-family:'Space Grotesk',sans-serif;font-size:88px;font-weight:700;background:var(--grad2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:spIn .9s ease both;letter-spacing:-2px;}
+.sp-tag{font-size:15px;color:#6060A0;letter-spacing:.2em;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;animation:spIn .9s .25s ease both;}
+.sp-bar{width:80px;height:3px;background:#1A1A30;border-radius:3px;overflow:hidden;animation:spIn .9s .4s ease both;}
+.sp-bar::after{content:'';display:block;height:100%;width:0;background:var(--grad2);animation:spLoad 1.8s .5s ease-in-out infinite;}
+@keyframes spIn{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+@keyframes spLoad{0%{width:0;margin-left:0;}50%{width:100%;margin-left:0;}100%{width:0;margin-left:100%;}}
+
+/* CURSOR */
+#cd,#cr{position:fixed;pointer-events:none;z-index:9999;border-radius:50%;}
+#cd{width:9px;height:9px;background:var(--pink);top:-5px;left:-5px;}
+#cr{width:40px;height:40px;border:2px solid rgba(208,40,134,.65);top:-20px;left:-20px;transition:width .22s,height .22s,top .22s,left .22s;}
+#cr.h{width:58px;height:58px;top:-29px;left:-29px;border-color:var(--pink);}
+@media(hover:none){#cd,#cr{display:none;}body{cursor:auto;}}
+
+/* READING PROGRESS */
+#prog{position:fixed;top:0;left:0;height:3px;width:0;background:var(--grad2);z-index:2000;transition:width .1s;display:none;}
+
+/* TYPOGRAPHY */
+h1,h2,h3,h4,h5{font-family:'Space Grotesk',sans-serif;line-height:1.15;}
+.gt{background:var(--grad2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.tag{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 11px;border-radius:50px;font-family:'Space Grotesk',sans-serif;}
+.tag-news{background:rgba(208,40,134,.2);color:#e060b0;}
+.tag-review{background:rgba(84,33,142,.25);color:#a07ae0;}
+.tag-top{background:rgba(255,51,153,.15);color:#ff5faa;}
+.tag-analyse{background:rgba(255,95,179,.15);color:#ff80c0;}
+.tag-guide{background:rgba(17,153,142,.18);color:#30c8b8;}
+
+/* PAGE ANIM */
+#app{animation:pgIn .35s ease;}
+@keyframes pgIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+/* HEADER */
+header{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;display:flex;align-items:center;justify-content:space-between;padding:0 40px;transition:background .3s,border .3s;}
+header.sc{background:rgba(8,8,15,.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--brd);}
+[data-theme=light] header.sc{background:rgba(244,244,250,.92);}
+.logo{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:26px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;cursor:none;}
+nav{display:flex;gap:4px;}
+nav a{padding:8px 14px;border-radius:8px;font-size:14px;font-weight:500;color:var(--t2);transition:color .2s,background .2s;cursor:none;position:relative;}
+nav a::after{content:'';position:absolute;bottom:4px;left:14px;right:14px;height:2px;background:var(--grad2);border-radius:2px;transform:scaleX(0);transition:transform .2s;}
+nav a:hover,nav a.on{color:var(--t);}
+nav a:hover::after,nav a.on::after{transform:scaleX(1);}
+.hact{display:flex;align-items:center;gap:10px;}
+.ibtn{background:none;border:none;cursor:none;color:var(--t2);padding:8px;border-radius:8px;font-size:19px;transition:color .2s,background .2s;}
+.ibtn:hover{color:var(--t);background:var(--elev);}
+.tbtn{width:50px;height:26px;border-radius:50px;background:var(--elev);border:1px solid var(--brd);position:relative;cursor:none;}
+.tbtn::after{content:'🌙';position:absolute;top:1px;left:1px;width:22px;height:22px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:11px;transition:transform .3s;}
+[data-theme=light] .tbtn::after{content:'☀️';transform:translateX(24px);}
+.hbg{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:none;padding:4px;}
+.hbg span{width:22px;height:2px;background:var(--t);border-radius:2px;display:block;transition:all .3s;}
+
+/* MOBILE MENU */
+.mm{position:fixed;inset:0;z-index:999;background:rgba(4,4,10,.97);backdrop-filter:blur(20px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;transform:translateX(100%);transition:transform .4s cubic-bezier(.25,.46,.45,.94);}
+.mm.open{transform:translateX(0);}
+.mm a{font-family:'Space Grotesk',sans-serif;font-size:30px;font-weight:700;cursor:none;transition:color .2s;}
+.mm a:hover{color:var(--pink2);}
+.xbtn{position:absolute;top:22px;right:24px;background:none;border:none;cursor:none;color:var(--t);font-size:26px;}
+
+/* SKELETON */
+.sk{background:linear-gradient(90deg,var(--elev) 25%,var(--card) 50%,var(--elev) 75%);background-size:200% 100%;animation:sk 1.5s infinite;border-radius:8px;}
+@keyframes sk{from{background-position:200% 0;}to{background-position:-200% 0;}}
+
+/* REVEAL */
+.rv{opacity:0;transform:translateY(20px);transition:opacity .6s,transform .6s;}
+.rv.on{opacity:1;transform:none;}
+.rv:nth-child(2){transition-delay:.07s;}.rv:nth-child(3){transition-delay:.12s;}.rv:nth-child(4){transition-delay:.17s;}.rv:nth-child(5){transition-delay:.22s;}.rv:nth-child(6){transition-delay:.27s;}
+
+/* ======== HERO ======== */
+.hero{height:100vh;min-height:600px;position:relative;overflow:hidden;display:flex;align-items:center;}
+.hero-img{position:absolute;inset:0;background-size:cover;background-position:center 15%;transition:background-image .8s ease;animation:heroZ 12s ease-in-out infinite alternate;}
+@keyframes heroZ{from{transform:scale(1);}to{transform:scale(1.06);}}
+.hero-ov{position:absolute;inset:0;background:linear-gradient(to right,rgba(4,4,12,.97) 0%,rgba(4,4,12,.8) 45%,rgba(4,4,12,.35) 75%,rgba(4,4,12,.2) 100%),linear-gradient(to top,rgba(4,4,12,.7) 0%,transparent 40%);}
+[data-theme=light] .hero-ov{background:linear-gradient(to right,rgba(244,244,250,.98) 0%,rgba(244,244,250,.85) 45%,rgba(244,244,250,.5) 75%,rgba(244,244,250,.3) 100%),linear-gradient(to top,rgba(244,244,250,.6) 0%,transparent 40%);}
+.hero-orbs{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
+.orb{position:absolute;border-radius:50%;animation:orbF 12s ease-in-out infinite;}
+.o1{width:600px;height:600px;background:radial-gradient(circle,rgba(84,33,142,.35),transparent 70%);top:-180px;right:-80px;filter:blur(50px);}
+.o2{width:380px;height:380px;background:radial-gradient(circle,rgba(208,40,134,.25),transparent 70%);bottom:-60px;left:40%;filter:blur(60px);animation-delay:-5s;}
+@keyframes orbF{0%,100%{transform:translate(0,0);}50%{transform:translate(15px,-25px);}}
+#pts{position:absolute;inset:0;pointer-events:none;}
+.pt{position:absolute;border-radius:50%;animation:ptA var(--d,8s) ease-in-out infinite;opacity:0;}
+@keyframes ptA{0%{opacity:0;transform:scale(0);}20%{opacity:var(--op,.5);transform:scale(1);}80%{opacity:var(--op,.5);}100%{opacity:0;transform:translate(var(--tx,20px),var(--ty,-60px)) scale(0);}}
+.hero-cnt{position:relative;z-index:2;padding:0 40px;max-width:700px;}
+.hbadge{display:inline-flex;align-items:center;gap:8px;background:rgba(208,40,134,.12);border:1px solid rgba(208,40,134,.3);border-radius:50px;padding:6px 16px;font-size:13px;font-weight:600;color:var(--pink2);margin-bottom:26px;font-family:'Space Grotesk',sans-serif;animation:fU .8s ease both;}
+.hbadge::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--pink);animation:bl 2s ease-in-out infinite;}
+@keyframes bl{0%,100%{box-shadow:0 0 0 0 rgba(255,51,153,.6);}50%{box-shadow:0 0 0 6px rgba(255,51,153,0);}}
+.hero h1{font-size:clamp(46px,6.5vw,86px);font-weight:700;line-height:1.03;margin-bottom:20px;animation:fU .8s .1s ease both;}
+.hero p{font-size:18px;color:var(--t2);line-height:1.72;max-width:500px;margin-bottom:36px;animation:fU .8s .2s ease both;}
+.hbtns{display:flex;gap:14px;flex-wrap:wrap;animation:fU .8s .3s ease both;}
+.btnp{display:inline-flex;align-items:center;gap:8px;background:var(--grad2);color:#fff;border:none;cursor:none;padding:14px 28px;border-radius:50px;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;box-shadow:0 4px 24px rgba(208,40,134,.4);transition:transform .2s,box-shadow .2s;}
+.btnp:hover{transform:translateY(-2px);box-shadow:0 8px 36px rgba(208,40,134,.65);}
+.btns{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);color:var(--t);padding:13px 26px;border-radius:50px;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;border:1px solid rgba(255,255,255,.15);cursor:none;transition:background .2s,transform .2s;backdrop-filter:blur(8px);}
+.btns:hover{background:rgba(255,255,255,.14);transform:translateY(-2px);}
+
+/* Hero featured anime row */
+.hero-anime-row{position:absolute;right:40px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:12px;z-index:3;animation:fU 1s .5s ease both;}
+.ha-card{width:130px;height:190px;border-radius:12px;overflow:hidden;position:relative;cursor:none;transition:transform .3s;border:1px solid rgba(255,255,255,.1);}
+.ha-card:hover{transform:translateX(-6px) scale(1.04);}
+.ha-card img{object-position:top;}
+.ha-card .ov{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.7) 0%,transparent 60%);}
+.ha-card .ht{position:absolute;bottom:8px;left:8px;right:8px;font-size:10px;font-weight:700;color:#fff;font-family:'Space Grotesk',sans-serif;line-height:1.3;}
+.ha-card:nth-child(2){transform:translateX(16px);}
+.ha-card:nth-child(2):hover{transform:translateX(10px) scale(1.04);}
+
+.scrollhint{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:7px;color:rgba(255,255,255,.35);font-size:10px;letter-spacing:.15em;text-transform:uppercase;z-index:2;}
+.scrollhint::after{content:'';width:1px;height:34px;background:linear-gradient(to bottom,var(--rose),transparent);animation:sl 1.5s ease-in-out infinite;}
+@keyframes sl{0%,100%{opacity:1;}50%{opacity:.2;}}
+@keyframes fU{from{opacity:0;transform:translateY(26px);}to{opacity:1;transform:translateY(0);}}
+
+/* TICKER */
+.ticker{background:var(--grad2);padding:11px 0;overflow:hidden;position:relative;z-index:5;}
+.tl{position:absolute;left:0;top:0;bottom:0;background:var(--violet);display:flex;align-items:center;padding:0 18px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:11px;letter-spacing:.15em;text-transform:uppercase;z-index:2;white-space:nowrap;}
+.tl::after{content:'';position:absolute;right:-16px;top:0;bottom:0;width:16px;background:linear-gradient(to right,var(--violet),transparent);}
+.ti2{display:flex;gap:56px;animation:tk 40s linear infinite;padding-left:180px;white-space:nowrap;}
+.ti2:hover{animation-play-state:paused;}
+.ti2 span{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;color:#fff;font-family:'Space Grotesk',sans-serif;}
+.ti2 span::before{content:'⚡';}
+@keyframes tk{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+
+/* WRAP & LAYOUT */
+.wrap{max-width:1240px;margin:0 auto;padding:0 36px;}
+section{padding:80px 0;}
+.sh{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:44px;}
+.stitle{font-size:clamp(22px,3vw,32px);font-weight:700;}
+.stitle small{display:block;font-size:13px;font-weight:400;color:var(--t3);margin-top:5px;font-family:'Inter',sans-serif;}
+.seeall{font-size:13px;font-weight:600;color:var(--rose);display:flex;align-items:center;gap:5px;cursor:none;font-family:'Space Grotesk',sans-serif;transition:gap .2s;}
+.seeall:hover{gap:9px;}
+
+/* ======== EDITORIAL HERO CARD ======== */
+.ed-hero{height:520px;border-radius:20px;overflow:hidden;position:relative;display:block;cursor:none;transition:transform .35s;}
+.ed-hero:hover{transform:translateY(-4px);}
+.ed-hero .bg{position:absolute;inset:0;background-size:cover;background-position:center;transition:transform .6s;}
+.ed-hero:hover .bg{transform:scale(1.03);}
+.ed-hero .bg img{transition:transform .6s;}
+.ed-hero:hover .bg img{transform:scale(1.03);}
+.ed-hero .ov{position:absolute;inset:0;background:linear-gradient(to top,rgba(3,3,10,.97) 0%,rgba(3,3,10,.5) 55%,transparent 100%);}
+.ed-hero .cnt{position:absolute;bottom:0;left:0;right:0;padding:40px;}
+.ed-hero .cnt .tag{margin-bottom:14px;}
+.ed-hero h2{font-size:clamp(24px,3vw,40px);color:#fff;-webkit-text-fill-color:#fff;margin-bottom:12px;max-width:680px;line-height:1.2;}
+.ed-hero .xrp{font-size:15px;color:rgba(255,255,255,.68);max-width:560px;line-height:1.6;margin-bottom:18px;}
+.ed-hero .meta{display:flex;align-items:center;gap:12px;font-size:13px;color:rgba(255,255,255,.5);}
+.av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0;font-family:'Space Grotesk',sans-serif;}
+
+/* STRIP */
+.lstrip{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-top:20px;}
+.ls{background:var(--card);border-radius:12px;overflow:hidden;border:1px solid var(--brd);cursor:none;display:block;transition:transform .25s,border-color .25s,box-shadow .25s;}
+.ls:hover{transform:translateY(-4px);border-color:rgba(208,40,134,.35);box-shadow:0 12px 32px rgba(208,40,134,.1);}
+.ls-img{height:108px;overflow:hidden;background:var(--elev);}
+.ls-img img,.ls-img div{height:100%;width:100%;transition:transform .4s;background-size:cover;background-position:top;}
+.ls:hover .ls-img img,.ls:hover .ls-img div{transform:scale(1.07);}
+.ls-b{padding:12px;}
+.ls-b .tag{margin-bottom:7px;}
+.ls-b h4{font-size:13px;font-weight:600;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.ls-b .mt{font-size:11px;color:var(--t3);margin-top:6px;}
+
+/* MAIN+SIDEBAR */
+.ms{display:grid;grid-template-columns:1fr 330px;gap:32px;margin-top:48px;}
+.fg{display:grid;grid-template-columns:1.2fr 1fr;grid-template-rows:auto auto;gap:18px;}
+.fgm{grid-row:1/-1;background:var(--card);border-radius:var(--r);overflow:hidden;border:1px solid var(--brd);cursor:none;display:block;transition:transform .3s,box-shadow .3s,border-color .3s;}
+.fgm:hover{transform:translateY(-5px);box-shadow:0 20px 50px rgba(208,40,134,.13);border-color:rgba(208,40,134,.35);}
+.fgm .th{height:220px;overflow:hidden;background:var(--elev);}
+.fgm .th img{transition:transform .5s;}
+.fgm:hover .th img{transform:scale(1.06);}
+.fgm .bd{padding:20px;}
+.fgm h3{font-size:18px;font-weight:700;line-height:1.35;margin:10px 0 10px;}
+.fgm .exc{font-size:14px;color:var(--t2);line-height:1.6;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:14px;}
+.fgm .mt{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--t3);}
+.fgs{background:var(--card);border-radius:var(--r);overflow:hidden;border:1px solid var(--brd);cursor:none;display:flex;gap:14px;padding:14px;transition:transform .25s,border-color .25s;display:block;display:flex;}
+.fgs:hover{transform:translateX(5px);border-color:rgba(208,40,134,.35);}
+.fgs .st{width:88px;height:88px;border-radius:10px;overflow:hidden;flex-shrink:0;background:var(--elev);}
+.fgs .st img,.fgs .st div{width:100%;height:100%;transition:transform .4s;background-size:cover;background-position:top;}
+.fgs:hover .st img,.fgs:hover .st div{transform:scale(1.07);}
+.fgs .sb h4{font-size:14px;font-weight:600;line-height:1.4;margin:6px 0 7px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.fgs .sb .mt{font-size:11px;color:var(--t3);}
+
+/* SIDEBAR */
+.sbn{background:var(--card);border-radius:var(--r);border:1px solid var(--brd);overflow:hidden;}
+.sbn h4{padding:14px 18px;border-bottom:1px solid var(--brd);font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--t3);font-family:'Space Grotesk',sans-serif;}
+.si{padding:13px 18px;border-bottom:1px solid var(--brd);cursor:none;transition:background .2s;display:block;}
+.si:last-child{border-bottom:none;}
+.si:hover{background:var(--elev);}
+.si .tag{margin-bottom:5px;}
+.si p{font-size:13px;font-weight:600;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.si .mt{font-size:11px;color:var(--t3);margin-top:4px;}
+
+/* ARTICLE CARDS */
+.ag{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;}
+.ac{background:var(--card);border-radius:var(--r);overflow:hidden;border:1px solid var(--brd);cursor:none;display:block;transition:transform .3s,box-shadow .3s,border-color .3s;}
+.ac:hover{transform:translateY(-5px);box-shadow:0 18px 48px rgba(208,40,134,.13);border-color:rgba(208,40,134,.35);}
+.ac-th{height:195px;overflow:hidden;position:relative;background:var(--elev);}
+.ac-th img,.ac-th div{height:100%;width:100%;transition:transform .5s;background-size:cover;background-position:top;}
+.ac:hover .ac-th img,.ac:hover .ac-th div{transform:scale(1.06);}
+.ac-tg{position:absolute;top:12px;left:12px;}
+.ac-b{padding:18px;}
+.ac-title{font-size:16px;font-weight:600;line-height:1.4;margin:9px 0 9px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.ac-exc{font-size:13px;color:var(--t2);line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:14px;}
+.ac-meta{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--t3);}
+.dot{width:3px;height:3px;border-radius:50%;background:var(--t3);}
+.rt{margin-left:auto;}
+
+/* MANGA GUIDE BANNER */
+.mgb{background:var(--grad);border-radius:20px;padding:48px;display:flex;align-items:center;justify-content:space-between;position:relative;overflow:hidden;cursor:none;transition:transform .3s,box-shadow .3s;margin-bottom:80px;}
+.mgb:hover{transform:translateY(-3px);box-shadow:0 20px 60px rgba(208,40,134,.35);}
+.mgb::before{content:'';position:absolute;right:-60px;top:-60px;width:320px;height:320px;border-radius:50%;background:rgba(255,255,255,.04);}
+.mgb .l h2{font-size:clamp(20px,3vw,30px);color:#fff;-webkit-text-fill-color:#fff;margin-bottom:9px;}
+.mgb .l p{color:rgba(255,255,255,.78);font-size:15px;max-width:420px;line-height:1.6;}
+.mgb .r{z-index:1;flex-shrink:0;}
+
+/* CALENDAR */
+#cal{background:var(--bg2);}
+.stabs{display:flex;gap:8px;margin-bottom:28px;flex-wrap:wrap;}
+.stab{padding:8px 20px;border-radius:50px;font-size:13px;font-weight:600;border:1px solid var(--brd);background:transparent;color:var(--t2);cursor:none;transition:all .2s;font-family:'Space Grotesk',sans-serif;}
+.stab.on{background:var(--grad2);border-color:transparent;color:#fff;}
+.stab:not(.on):hover{border-color:var(--rose);color:var(--t);}
+.cscroll{overflow-x:auto;padding-bottom:12px;}
+.cscroll::-webkit-scrollbar{height:4px;}
+.cscroll::-webkit-scrollbar-track{background:var(--elev);border-radius:4px;}
+.cscroll::-webkit-scrollbar-thumb{background:var(--grad);border-radius:4px;}
+.cg{display:flex;gap:18px;width:max-content;padding:4px 2px;}
+.anc{width:190px;flex-shrink:0;background:var(--card);border-radius:var(--r);overflow:hidden;border:1px solid var(--brd);transition:transform .3s,box-shadow .3s,border-color .3s;cursor:none;display:block;}
+.anc:hover{transform:translateY(-8px) scale(1.02);box-shadow:0 24px 60px rgba(208,40,134,.2);border-color:rgba(208,40,134,.5);}
+.an-p{height:265px;position:relative;overflow:hidden;background:var(--elev);}
+.an-p img{height:100%;width:100%;object-position:top;transition:transform .5s;}
+.anc:hover .an-p img{transform:scale(1.05);}
+.an-ov{position:absolute;inset:0;background:linear-gradient(to top,rgba(3,3,10,.88) 0%,transparent 55%);}
+.an-badge{position:absolute;top:10px;right:10px;background:var(--grad2);color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;font-family:'Space Grotesk',sans-serif;}
+.an-day{position:absolute;top:10px;left:10px;background:rgba(0,0,0,.65);color:rgba(255,255,255,.88);font-size:10px;font-weight:600;padding:3px 9px;border-radius:6px;font-family:'Space Grotesk',sans-serif;backdrop-filter:blur(8px);}
+.an-score{position:absolute;bottom:50px;left:10px;display:flex;align-items:center;gap:4px;font-size:12px;font-weight:700;color:#fff;font-family:'Space Grotesk',sans-serif;}
+.an-score::before{content:'★';color:#FFD700;font-size:13px;}
+.an-i{padding:13px;}
+.an-t{font-size:13px;font-weight:700;line-height:1.4;margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.an-s{font-size:11px;color:var(--t3);margin-bottom:8px;}
+.gps{display:flex;flex-wrap:wrap;gap:4px;}
+.gp{font-size:10px;padding:3px 8px;border-radius:50px;background:var(--elev);color:var(--t2);font-weight:500;}
+
+/* CATEGORIES */
+.catg{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;}
+.ccat{background:var(--card);border-radius:var(--r);border:1px solid var(--brd);padding:26px 14px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;cursor:none;transition:transform .3s,box-shadow .3s,border-color .3s;position:relative;overflow:hidden;}
+.ccat::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .3s;}
+.ccat:hover{transform:translateY(-5px);}
+.ccat:hover::before{opacity:1;}
+.ci{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;transition:transform .3s;}
+.ccat:hover .ci{transform:scale(1.15) rotate(-5deg);}
+.cname{font-size:12px;font-weight:700;font-family:'Space Grotesk',sans-serif;}
+.ccnt{font-size:11px;color:var(--t3);}
+.c1 .ci{background:linear-gradient(135deg,#FF6B6B,#FFE66D);}.c1:hover{border-color:rgba(255,107,107,.4);box-shadow:0 14px 36px rgba(255,107,107,.13);}.c1::before{background:linear-gradient(135deg,rgba(255,107,107,.07),rgba(255,230,109,.07));}
+.c2 .ci{background:linear-gradient(135deg,#667eea,#764ba2);}.c2:hover{border-color:rgba(102,126,234,.4);box-shadow:0 14px 36px rgba(102,126,234,.13);}.c2::before{background:linear-gradient(135deg,rgba(102,126,234,.07),rgba(118,75,162,.07));}
+.c3 .ci{background:linear-gradient(135deg,#D02886,#54218E);}.c3:hover{border-color:rgba(208,40,134,.4);box-shadow:0 14px 36px rgba(208,40,134,.13);}.c3::before{background:linear-gradient(135deg,rgba(208,40,134,.07),rgba(84,33,142,.07));}
+.c4 .ci{background:linear-gradient(135deg,#F093FB,#F5576C);}.c4:hover{border-color:rgba(240,147,251,.4);box-shadow:0 14px 36px rgba(240,147,251,.13);}.c4::before{background:linear-gradient(135deg,rgba(240,147,251,.07),rgba(245,87,108,.07));}
+.c5 .ci{background:linear-gradient(135deg,#FF512F,#DD2476);}.c5:hover{border-color:rgba(255,81,47,.4);box-shadow:0 14px 36px rgba(255,81,47,.13);}.c5::before{background:linear-gradient(135deg,rgba(255,81,47,.07),rgba(221,36,118,.07));}
+.c6 .ci{background:linear-gradient(135deg,#11998E,#38EF7D);}.c6:hover{border-color:rgba(17,153,142,.4);box-shadow:0 14px 36px rgba(17,153,142,.13);}.c6::before{background:linear-gradient(135deg,rgba(17,153,142,.07),rgba(56,239,125,.07));}
+
+/* NEWSLETTER */
+#nl{background:var(--bg2);position:relative;overflow:hidden;}
+.nl-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,rgba(84,33,142,.2) 0%,transparent 70%);}
+.nl-w{position:relative;z-index:2;max-width:570px;margin:0 auto;text-align:center;}
+.nl-w h2{font-size:clamp(28px,4vw,42px);margin-bottom:12px;}
+.nl-w p{color:var(--t2);font-size:15px;margin-bottom:32px;line-height:1.7;}
+.nform{display:flex;border-radius:50px;background:var(--card);border:1px solid var(--brd);overflow:hidden;transition:border-color .3s,box-shadow .3s;}
+.nform:focus-within{border-color:var(--rose);box-shadow:0 0 0 4px rgba(208,40,134,.1);}
+.nform input{flex:1;background:transparent;border:none;outline:none;padding:15px 22px;font-size:15px;color:var(--t);font-family:'Inter',sans-serif;}
+.nform input::placeholder{color:var(--t3);}
+.nform button{background:var(--grad2);border:none;cursor:none;padding:13px 26px;border-radius:50px;color:#fff;font-weight:700;font-size:14px;font-family:'Space Grotesk',sans-serif;margin:3px;transition:opacity .2s;}
+.nform button:hover{opacity:.88;}
+.nlok{display:none;flex-direction:column;align-items:center;gap:10px;}
+.nlok .ck{width:52px;height:52px;border-radius:50%;background:var(--grad2);display:flex;align-items:center;justify-content:center;font-size:22px;animation:pop .4s ease;}
+@keyframes pop{from{transform:scale(0);}to{transform:scale(1);}}
+.nlnote{font-size:12px;color:var(--t3);margin-top:12px;}
+
+/* ARTICLE PAGE */
+.art-hero{height:500px;position:relative;overflow:hidden;}
+.art-hero .bg{position:absolute;inset:0;background-size:cover;background-position:center 20%;}
+.art-hero .bg img{height:100%;object-position:center 20%;}
+.art-hero .ov{position:absolute;inset:0;background:linear-gradient(to top,rgba(3,3,10,1) 0%,rgba(3,3,10,.55) 50%,rgba(3,3,10,.25) 100%);}
+[data-theme=light] .art-hero .ov{background:linear-gradient(to top,rgba(244,244,250,1) 0%,rgba(244,244,250,.65) 55%,transparent 100%);}
+.art-mt{position:absolute;bottom:0;left:0;right:0;padding:0 0 40px;}
+.art-mt .wrap{display:flex;flex-direction:column;gap:14px;}
+.art-mt .tag{align-self:flex-start;}
+.art-mt h1{font-size:clamp(28px,4vw,52px);max-width:800px;line-height:1.1;}
+.art-sub{font-size:17px;color:var(--t2);max-width:660px;line-height:1.6;margin-top:6px;}
+.art-info{display:flex;align-items:center;gap:14px;font-size:13px;color:var(--t3);flex-wrap:wrap;}
+.art-info .aname{font-weight:600;color:var(--t2);}
+.art-info .sep{opacity:.35;}
+.abw{display:grid;grid-template-columns:1fr 290px;gap:56px;padding-top:52px;}
+.ab p{font-size:18px;line-height:1.85;color:#C5C5E0;margin-bottom:24px;font-family:'Lora',serif;}
+[data-theme=light] .ab p{color:var(--t2);}
+.ab h2{font-size:clamp(20px,2.5vw,28px);margin:40px 0 16px;color:var(--t);}
+.ab h3{font-size:clamp(17px,2vw,22px);margin:30px 0 13px;color:var(--t);}
+.ab blockquote{border-left:4px solid var(--rose);margin:32px 0;padding:16px 24px;background:var(--card);border-radius:0 12px 12px 0;font-size:18px;font-style:italic;color:var(--t);line-height:1.65;font-family:'Lora',serif;}
+.ab .lead{font-size:21px;line-height:1.75;color:var(--t);font-weight:400;margin-bottom:28px;font-family:'Lora',serif;}
+.score-box{background:var(--card);border:1px solid var(--brd);border-radius:16px;padding:28px;margin:36px 0;display:flex;align-items:center;gap:22px;}
+.score-n{font-family:'Space Grotesk',sans-serif;font-size:56px;font-weight:700;background:var(--grad2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;}
+.score-i h4{font-size:16px;margin-bottom:6px;}
+.score-i p{font-size:14px;color:var(--t2);}
+.score-i .st{font-size:20px;margin-top:4px;}
+.art-tags{display:flex;flex-wrap:wrap;gap:8px;margin:32px 0;}
+.art-tag{padding:7px 16px;border-radius:50px;background:var(--elev);border:1px solid var(--brd);font-size:13px;color:var(--t2);cursor:none;transition:all .2s;}
+.art-tag:hover{border-color:var(--rose);color:var(--pink2);}
+.acard{background:var(--card);border:1px solid var(--brd);border-radius:16px;padding:22px;display:flex;gap:16px;align-items:flex-start;margin-top:48px;}
+.acard .abig{width:62px;height:62px;border-radius:50%;font-size:20px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Space Grotesk',sans-serif;}
+.acard h4{font-size:16px;margin-bottom:6px;}
+.acard p{font-size:14px;color:var(--t2);line-height:1.6;}
+.art-aside{position:relative;}
+.ast{position:sticky;top:86px;}
+.toc{background:var(--card);border:1px solid var(--brd);border-radius:14px;padding:20px;margin-bottom:20px;}
+.toc h5{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:14px;font-family:'Space Grotesk',sans-serif;}
+.toc ul{list-style:none;display:flex;flex-direction:column;gap:7px;}
+.toc ul li a{font-size:13px;color:var(--t2);cursor:none;display:block;padding:4px 8px;border-radius:6px;transition:background .2s,color .2s;line-height:1.4;}
+.toc ul li a:hover{background:var(--elev);color:var(--pink2);}
+.rbox{background:var(--card);border:1px solid var(--brd);border-radius:14px;overflow:hidden;}
+.rbox h5{padding:14px 18px;border-bottom:1px solid var(--brd);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);font-family:'Space Grotesk',sans-serif;}
+.ri{display:flex;gap:12px;padding:13px 18px;border-bottom:1px solid var(--brd);cursor:none;transition:background .2s;display:block;}
+.ri:last-child{border-bottom:none;}
+.ri:hover{background:var(--elev);}
+.ri .rith{width:62px;height:62px;border-radius:8px;overflow:hidden;float:left;margin-right:11px;background:var(--elev);}
+.ri .rith img,.ri .rith div{width:100%;height:100%;background-size:cover;background-position:top;}
+.ri p{font-size:13px;font-weight:600;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.ri .mt{font-size:11px;color:var(--t3);margin-top:4px;clear:both;}
+.rbot{margin-top:60px;padding-top:40px;border-top:1px solid var(--brd);}
+.rbot h3{font-size:22px;margin-bottom:26px;}
+.rbg{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+
+/* MANGA GUIDE PAGE */
+.mg-h{background:var(--bg2);padding:120px 0 60px;position:relative;overflow:hidden;}
+.mg-h::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 110%,rgba(84,33,142,.28) 0%,transparent 65%);}
+.mg-h .wrap{position:relative;z-index:2;text-align:center;}
+.mg-h h1{font-size:clamp(34px,5vw,62px);margin-bottom:16px;}
+.mg-h p{font-size:17px;color:var(--t2);max-width:560px;margin:0 auto 30px;line-height:1.75;}
+.mgf{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;}
+.mf{padding:9px 22px;border-radius:50px;font-size:13px;font-weight:600;border:1px solid var(--brd);background:transparent;color:var(--t2);cursor:none;transition:all .2s;font-family:'Space Grotesk',sans-serif;}
+.mf.on{background:var(--grad2);border-color:transparent;color:#fff;}
+.mf:not(.on):hover{border-color:var(--rose);color:var(--t);}
+.mgg{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:56px;}
+.mgc{background:var(--card);border-radius:var(--r);overflow:hidden;border:1px solid var(--brd);transition:transform .3s,box-shadow .3s,border-color .3s;cursor:none;}
+.mgc:hover{transform:translateY(-6px);box-shadow:0 20px 56px rgba(208,40,134,.14);border-color:rgba(208,40,134,.4);}
+.mg-pos{height:225px;position:relative;overflow:hidden;background:var(--elev);}
+.mg-pos img{height:100%;object-position:top;transition:transform .5s;}
+.mgc:hover .mg-pos img{transform:scale(1.05);}
+.mg-pos .ov{position:absolute;inset:0;background:linear-gradient(to top,rgba(3,3,10,.95) 0%,rgba(3,3,10,.25) 60%,transparent 100%);}
+.mg-pos .letter{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-size:56px;font-weight:900;color:rgba(255,255,255,.12);}
+.mg-i{padding:18px;}
+.mg-an{font-size:16px;font-weight:700;margin-bottom:4px;}
+.mg-mn{font-size:12px;color:var(--t3);margin-bottom:10px;font-style:italic;}
+.mg-div{border:none;border-top:1px solid var(--brd);margin:10px 0;}
+.mg-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.mg-row .lb{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--t3);min-width:68px;font-family:'Space Grotesk',sans-serif;}
+.mg-row .vl{font-size:13px;font-weight:700;color:var(--pink2);font-family:'Space Grotesk',sans-serif;}
+.mg-st{display:inline-flex;align-items:center;gap:5px;font-size:11px;padding:3px 10px;border-radius:50px;font-weight:600;font-family:'Space Grotesk',sans-serif;}
+.mg-st.done{background:rgba(17,153,142,.15);color:#30c8b8;}
+.mg-st.ongoing{background:rgba(208,40,134,.15);color:#e060b0;}
+.mg-exc{font-size:13px;color:var(--t2);line-height:1.6;margin-top:10px;}
+
+/* FOOTER */
+footer{background:#03030A;padding:60px 0 28px;border-top:1px solid var(--brd);}
+[data-theme=light] footer{background:#E4E4F2;}
+.fgrid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:44px;margin-bottom:44px;}
+.fb p{color:var(--t3);font-size:14px;line-height:1.7;max-width:265px;margin:14px 0 20px;}
+.soc{display:flex;gap:9px;}
+.sbtn{width:36px;height:36px;border-radius:10px;background:var(--elev);border:1px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:15px;transition:all .2s;cursor:none;}
+.sbtn:hover{background:var(--grad);border-color:transparent;transform:translateY(-2px);}
+.fc h5{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-bottom:18px;font-family:'Space Grotesk',sans-serif;}
+.fc ul{list-style:none;display:flex;flex-direction:column;gap:9px;}
+.fc ul li a{font-size:14px;color:var(--t2);cursor:none;transition:color .2s;}
+.fc ul li a:hover{color:var(--pink2);}
+.fbot{border-top:1px solid var(--brd);padding-top:24px;display:flex;align-items:center;justify-content:space-between;font-size:13px;color:var(--t3);}
+.heart{color:var(--pink);animation:hb 1.5s ease-in-out infinite;display:inline-block;}
+@keyframes hb{0%,100%{transform:scale(1);}15%{transform:scale(1.28);}30%{transform:scale(1);}45%{transform:scale(1.15);}}
+
+/* RESPONSIVE */
+@media(max-width:1100px){
+  .ms{grid-template-columns:1fr;}.sidebar2{display:none;}
+  .catg{grid-template-columns:repeat(3,1fr);}
+  .mgg{grid-template-columns:repeat(3,1fr);}
+  .abw{grid-template-columns:1fr;}.art-aside{display:none;}
+  .fgrid{grid-template-columns:1fr 1fr;}
+  .hero-anime-row{display:none;}
+  .fg{grid-template-columns:1fr;}
+  .fgm{grid-row:auto;}
+}
+@media(max-width:768px){
+  nav,.ibtn{display:none;}.hbg{display:flex;}
+  header{padding:0 20px;}.wrap{padding:0 20px;}
+  section{padding:54px 0;}
+  .lstrip{grid-template-columns:repeat(2,1fr);}
+  .ag{grid-template-columns:1fr;}
+  .catg{grid-template-columns:repeat(2,1fr);}
+  .mgg{grid-template-columns:repeat(2,1fr);}
+  .rbg{grid-template-columns:1fr;}
+  .mgb{flex-direction:column;gap:18px;text-align:center;}
+  .fgrid{grid-template-columns:1fr;}
+  .fbot{flex-direction:column;gap:8px;text-align:center;}
+  .hero-cnt{padding:0 20px;}
+  .sh{flex-direction:column;align-items:flex-start;gap:10px;}
+}
+</style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div class="splash" id="splash">
+  <div class="sp-logo">INKU</div>
+  <div class="sp-tag">Anime & Manga en français</div>
+  <div class="sp-bar"></div>
+</div>
+
+<div id="prog"></div>
+<div id="cd"></div>
+<div id="cr"></div>
+
+<!-- MOBILE MENU -->
+<div class="mm" id="mm">
+  <button class="xbtn" onclick="closeMM()">✕</button>
+  <a onclick="go('');closeMM()">Accueil</a>
+  <a onclick="go('articles');closeMM()">Actualités</a>
+  <a onclick="go('calendrier');closeMM()">Calendrier</a>
+  <a onclick="go('manga-guide');closeMM()">Guide Manga</a>
+</div>
+
+<header id="hdr">
+  <a class="logo" onclick="go('')">INKU</a>
+  <nav>
+    <a onclick="go('')" id="n0">Accueil</a>
+    <a onclick="go('articles')" id="n1">Actualités</a>
+    <a onclick="go('calendrier')" id="n2">Calendrier</a>
+    <a onclick="go('manga-guide')" id="n3">Guide Manga</a>
+  </nav>
+  <div class="hact">
+    <button class="ibtn">⌕</button>
+    <button class="tbtn" onclick="toggleTheme()"></button>
+    <button class="hbg" onclick="openMM()"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<main id="app"></main>
+<footer id="foot"></footer>
+
+<script>
+/* ========= DATA ========= */
+const AL = { seasonal:[], popular:[], hero:null, loaded:false };
+
+const ARTICLES = {
+  'solo-leveling-s2':{slug:'solo-leveling-s2',animeId:153406,title:'Solo Leveling Saison 2 : Notre review complète des 12 épisodes',subtitle:'A-1 Pictures frappe encore plus fort avec une deuxième saison qui élève le standard de l\'anime d\'action',tag:'Review',tc:'tag-review',author:'Yuki Tanaka',ai:'YT',ag:'linear-gradient(135deg,#667eea,#764ba2)',abio:'Rédacteur en chef chez INKU. Passionné d\'anime depuis 15 ans, spécialiste des adaptations de manhwa.',date:'26 mars 2025',rt:'9 min',grad:'linear-gradient(160deg,#1a0533,#3d0a6e,#8b1fa2,#D02886)',letter:'SL',score:9.2,excerpt:'A-1 Pictures livre une saison encore plus ambitieuse, avec des combats ahurissants et une montée en puissance de Sung Jinwoo qui tient toutes ses promesses.',toc:['Une progression narrative','Des combats de légende','Quelques réserves','Le verdict'],content:`<p class="lead">La première saison de Solo Leveling avait posé les bases d'une adaptation solide du célèbre manhwa coréen. Avec cette saison 2, sobrement sous-titrée "Arise from the Shadow", A-1 Pictures prouve qu'il avait gardé le meilleur pour la fin.</p><h2>Une progression narrative parfaitement rythmée</h2><p>L'arc du Château du Roi Démon constitue le cœur de cette saison, et quel cœur. Les douze épisodes se dévorent avec une fluidité remarquable, alternant entre des séquences d'action ahurissantes et des moments d'introspection qui donnent davantage de profondeur au protagoniste. Là où la saison 1 pouvait parfois sembler répétitive dans sa formule "donjon, combat, montée de niveau", la saison 2 élargit considérablement le champ des possibles.</p><p>La narration prend le temps de développer l'armée d'ombres de Jinwoo, donnant une véritable personnalité à des entités qui auraient pu rester de simples outils. Igris, Tank, Beru — chacun acquiert une dimension émotionnelle inattendue.</p><blockquote>"Solo Leveling Saison 2 ne se contente pas de répéter la formule de la première saison — elle la transcende, rivalisant avec les meilleures productions du genre."</blockquote><h2>Des combats qui redéfinissent le standard</h2><p>Le combat contre le Seigneur Démon Baran (épisode 7) restera dans les annales de l'anime d'action : une chorégraphie d'une fluidité absolue, une bande-son de Hiroyuki Sawano qui pulse dans chaque scène, et une direction artistique qui n'a rien à envier aux meilleures productions Ufotable.</p><h2>Quelques réserves mineures</h2><p>Certains épisodes de transition souffrent d'une animation légèrement en retrait. Cha Hae-In mérite clairement plus de temps d'écran.</p>`},
+  'demon-slayer-finale':{slug:'demon-slayer-finale',animeId:101922,title:'Demon Slayer : La saison Pilier Soleil officiellement annoncée pour octobre 2025',subtitle:'Ufotable confirme l\'adaptation de l\'arc final lors d\'un événement spécial à Tokyo',tag:'News',tc:'tag-news',author:'Kana Mizuki',ai:'KM',ag:'linear-gradient(135deg,#f093fb,#f5576c)',abio:'Journaliste spécialisée anime chez INKU. Couvre les annonces japonaises en temps réel depuis Tokyo.',date:'24 mars 2025',rt:'4 min',grad:'linear-gradient(160deg,#0d1117,#2d0a20,#8b0000,#e63946)',letter:'DS',score:null,excerpt:'Lors d\'un événement live depuis Tokyo, Ufotable a officiellement annoncé la saison finale de Demon Slayer pour octobre 2025.',toc:['Ce qu\'on sait','Le teaser','Diffusion'],content:`<p class="lead">C'est lors d'un événement spécial diffusé en direct depuis le Tokyo Dome City Hall qu'Ufotable a déclenché une vague d'enthousiasme mondial : la saison Pilier Soleil sera diffusée en octobre 2025.</p><h2>Ce qu'on sait de cette saison finale</h2><p>La saison adaptera le dernier arc du manga — l'arc de la Forteresse du Château Infini et du combat final contre Muzan Kibutsuji. 13 épisodes sont prévus, avec un final d'environ 55 minutes.</p><blockquote>"Nous voulons que les spectateurs ressentent chaque émotion du manga, amplifiée par tout ce que seul l'animation peut offrir." — Haruo Sotozaki</blockquote><h2>Diffusion et plateformes</h2><p>Diffusion simultanée en France sur Crunchyroll et ADN, avec sous-titres français dès le jour J.</p>`},
+  'top-10-isekai':{slug:'top-10-isekai',animeId:108465,title:'Top 10 des animes isekai absolument incontournables en 2025',subtitle:'Notre sélection des meilleurs voyages vers d\'autres mondes',tag:'Top List',tc:'tag-top',author:'Ryuu Sato',ai:'RS',ag:'linear-gradient(135deg,#4facfe,#00f2fe)',abio:'Critique anime spécialisé dans les isekai et la light novel chez INKU.',date:'22 mars 2025',rt:'7 min',grad:'linear-gradient(160deg,#0f3460,#16213e,#533483,#e94560)',letter:'IS',score:null,excerpt:'Notre sélection des meilleurs animes isekai de 2025, entre nouveautés explosives et grands classiques indémodables.',toc:['#1 Mushoku Tensei','#2 Re:Zero','#3 Slime','La liste complète'],content:`<p class="lead">Le genre isekai continue de dominer les charts en 2025, avec une qualité en nette hausse et quelques pépites qui transcendent les clichés habituels.</p><h2>🥇 1. Mushoku Tensei : Jobless Reincarnation S3</h2><p>Le standard absolu du genre. La troisième saison explore des arcs émotionnellement dévastateurs, avec Rudeus confronté à ses traumatismes dans une narration mature qui fait honte à 95% des isekai.</p><h2>🥈 2. Re:Zero S4</h2><p>Subaru continue de mourir et de souffrir, et on continue de l'aimer pour ça. La saison 4 lève enfin le voile sur des mystères vieux de plusieurs années.</p><blockquote>"2025 marque la maturité du genre isekai : les séries médiocres disparaissent, les grandes franchises confirment leur statut."</blockquote>`},
+  'chainsaw-man-s2':{slug:'chainsaw-man-s2',animeId:127230,title:'Chainsaw Man Saison 2 : MAPPA confirme la production et dévoile les premières images',subtitle:'Le studio présente des visuels saisissants pour la suite des aventures de Denji',tag:'News',tc:'tag-news',author:'Kana Mizuki',ai:'KM',ag:'linear-gradient(135deg,#f093fb,#f5576c)',abio:'Journaliste spécialisée anime chez INKU. Couvre les annonces japonaises en temps réel depuis Tokyo.',date:'20 mars 2025',rt:'3 min',grad:'linear-gradient(160deg,#1a0a0a,#4a0010,#8b0000,#ff512f)',letter:'CM',score:null,excerpt:'MAPPA a officiellement annoncé Chainsaw Man Saison 2 avec des images confirmant un changement radical de direction artistique.',toc:['Un nouveau chapitre','Date et équipe'],content:`<p class="lead">Après deux ans de spéculations, MAPPA a finalement levé le voile sur Chainsaw Man Saison 2.</p><h2>Un nouveau chapitre pour Denji</h2><p>La saison 2 adaptera la Partie 2 du manga, avec un Denji transformé sous son identité de lycéen ordinaire. La direction artistique confirme un changement stylistique délibéré.</p><h2>Date et équipe</h2><p>Prévue pour janvier 2026. Ryū Nakayama reprend la direction, avec une nouvelle bande-son pour marquer la rupture narrative.</p>`},
+  'jjk-analyse':{slug:'jjk-analyse',animeId:145064,title:'Jujutsu Kaisen : Décryptage de la fin controversée du manga de Gege Akutami',subtitle:'Que nous dit vraiment la conclusion de JJK sur les intentions de son auteur ?',tag:'Analyse',tc:'tag-analyse',author:'Yuki Tanaka',ai:'YT',ag:'linear-gradient(135deg,#667eea,#764ba2)',abio:'Rédacteur en chef chez INKU. Passionné d\'anime depuis 15 ans.',date:'18 mars 2025',rt:'8 min',grad:'linear-gradient(160deg,#0d1b2a,#1b2838,#2d4a7a,#4a90d9)',letter:'JJK',score:null,excerpt:'La fin de Jujutsu Kaisen a divisé la communauté. On décortique les derniers chapitres pour comprendre ce que voulait vraiment Akutami.',toc:['Le problème perçu','Ce qu\'Akutami voulait','L\'héritage de JJK'],content:`<p class="lead">Rarement une fin de manga aura autant divisé une communauté. La conclusion de JJK est peut-être plus cohérente qu'elle n'y paraît.</p><h2>Le problème perçu : une fin trop abrupte</h2><p>Les critiques portent sur le rythme. Après un arc Shibuya exceptionnel, les chapitres finaux semblent accélérés. Nobara voit son arc conclu en quelques pages.</p><blockquote>"Akutami a écrit un anti-shonen. La conclusion n'est pas un triomphe — c'est une survivance."</blockquote><h2>Ce que Akutami voulait dire</h2><p>JJK a toujours été une œuvre sur la mort, la futilité des sacrifices et le cycle de la violence. La fin tire jusqu'à son extrémité logique cette thèse.</p>`},
+  'blue-lock-ep3':{slug:'blue-lock-ep3',animeId:136764,title:'Blue Lock S2 Épisode 3 : Kaiser écrase tout et c\'est magnifique',subtitle:'L\'épisode le plus intense de la saison confirme Blue Lock dans une forme olympique',tag:'Review',tc:'tag-review',author:'Ryuu Sato',ai:'RS',ag:'linear-gradient(135deg,#4facfe,#00f2fe)',abio:'Critique anime chez INKU, spécialisé dans les sports anime.',date:'15 mars 2025',rt:'5 min',grad:'linear-gradient(160deg,#0f3460,#16213e,#1a1a4e,#e94560)',letter:'BL',score:8.8,excerpt:'L\'épisode 3 de Blue Lock S2 est un concentré d\'adrénaline qui montre Kaiser dans toute sa monstruosité tactique.',toc:['Kaiser en mode boss','L\'animation','Le verdict'],content:`<p class="lead">Il y a des épisodes qui vous marquent physiquement. L'épisode 3 de Blue Lock S2 est de ceux-là — vous le finissez le souffle court, le cœur battant.</p><h2>Kaiser en mode boss final</h2><p>Michael Kaiser prend ici toute sa dimension de rival ultime. Sa relation avec Isagi est enfin pleinement explicitée : deux intelligences footballistiques diamétralement opposées.</p><blockquote>"Blue Lock S2 Épisode 3 est exactement pourquoi ce manga est devenu un phénomène. Du football sublimé en quelque chose qui ressemble à de l'art."</blockquote>`},
+};
+
+const MANGA_GUIDES = [
+  {id:'jjk',anime:'Jujutsu Kaisen',manga:'Jujutsu Kaisen',animeId:145064,ep:'3 saisons • 49 ép.',start:'Ch. 137',vol:'Tome 16',pub:'Glénat',total:271,status:'done',genre:'Action',exc:'La S2 s\'arrête après l\'arc de Shibuya. 134 chapitres inédits t\'attendent pour la guerre finale.'},
+  {id:'cm',anime:'Chainsaw Man',manga:'Chainsaw Man Part 2',animeId:127230,ep:'1 saison • 12 ép.',start:'Ch. 98',vol:'Partie 2 T.1',pub:'Glénat',total:174,status:'ongoing',genre:'Seinen',exc:'L\'anime couvre la Partie 1. La Partie 2 commence avec un Denji transformé dans un lycée. Complètement différent et encore meilleur.'},
+  {id:'aot',anime:'Attack on Titan',manga:'Shingeki no Kyojin',animeId:16498,ep:'4 saisons • 87 ép.',start:'Ch. 1',vol:'Tome 1',pub:'Pika',total:139,status:'done',genre:'Action',exc:'L\'anime est complet mais des détails et pages supplémentaires sont exclusifs au manga.'},
+  {id:'mha',anime:'My Hero Academia',manga:'Boku no Hero Academia',animeId:21459,ep:'8 saisons • 138 ép.',start:'Ch. 426',vol:'Tome 41',pub:'Kana',total:430,status:'done',genre:'Shonen',exc:'Quelques chapitres finaux et une meilleure lisibilité des combats de groupe sont les atouts du manga.'},
+  {id:'slime',anime:'That Time I Got Reincarnated as a Slime',manga:'Tensei Shitara Slime',animeId:101280,ep:'3 saisons • 48 ép.',start:'Ch. 80',vol:'Tome 11',pub:'Kurokawa',total:200,status:'ongoing',genre:'Isekai',exc:'Le manga continue avec des arcs géopolitiques fascinants et l\'expansion de la nation de Rimuru.'},
+  {id:'rz',anime:'Re:Zero',manga:'Re:Zero (Light Novel)',animeId:21355,ep:'3 saisons • 50 ép.',start:'LN Vol. 16',vol:'LN Vol. 16',pub:'Ofelbe',total:40,status:'ongoing',genre:'Isekai',exc:'Privilégie les Light Novels — nettement plus riches en détails et bien en avance sur l\'adaptation.'},
+  {id:'ol',anime:'Overlord',manga:'Overlord (Light Novel)',animeId:20832,ep:'4 saisons • 52 ép.',start:'LN Vol. 15',vol:'LN Vol. 15',pub:'Ofelbe',total:18,status:'done',genre:'Isekai',exc:'Les Light Novels sont supérieurs en profondeur narrative. Plonge dans le Vol. 15 pour la suite d\'Ainz.'},
+  {id:'op',anime:'One Piece',manga:'One Piece',animeId:21,ep:'En cours • 1100+ ép.',start:'Ch. 1100',vol:'Tome 109',pub:'Glénat',total:1110,status:'ongoing',genre:'Shonen',exc:'L\'anime est toujours en retard sur le manga d\'environ 50 chapitres. L\'arc Elbaf t\'attend.'},
+];
+
+const ANIMES = [
+  {title:'Demon Slayer: Pilier Soleil',studio:'ufotable',day:'Samedi',badge:'POPULAIRE',id:101922,genres:['Action','Shonen']},
+  {title:'Solo Leveling: Arise from the Shadow',studio:'A-1 Pictures',day:'Mercredi',badge:'NOUVEAU',id:153406,genres:['Action','Fantasy']},
+  {title:'Blue Lock: Saison 2',studio:'8bit',day:'Vendredi',badge:'',id:136764,genres:['Sports','Action']},
+  {title:'Re:Zero Saison 4',studio:'White Fox',day:'Mercredi',badge:'',id:21355,genres:['Isekai','Drama']},
+  {title:'Mushoku Tensei Saison 3',studio:'Studio Bind',day:'Dimanche',badge:'ATTENDU',id:108465,genres:['Isekai','Fantasy']},
+  {title:'Chainsaw Man Saison 2',studio:'MAPPA',day:'Mardi',badge:'MAPPA',id:127230,genres:['Seinen','Action']},
+  {title:'Overlord Saison 5',studio:'Madhouse',day:'Jeudi',badge:'',id:20832,genres:['Isekai','Dark']},
+  {title:'My Hero Academia S8',studio:'Bones',day:'Samedi',badge:'',id:21459,genres:['Shonen','Action']},
+];
+
+/* ========= ANILIST API ========= */
+let imgCache = {};
+
+async function fetchAniList() {
+  const ids = [...new Set([
+    ...Object.values(ARTICLES).map(a=>a.animeId),
+    ...ANIMES.map(a=>a.id),
+    ...MANGA_GUIDES.map(g=>g.animeId)
+  ])];
+  const q = `query($ids:[Int]){
+    trending:Page(perPage:1){media(type:ANIME,sort:TRENDING_DESC,isAdult:false){bannerImage coverImage{extraLarge}title{romaji}}}
+    season:Page(perPage:8){media(type:ANIME,season:SPRING,seasonYear:2025,sort:POPULARITY_DESC,isAdult:false){id title{romaji}coverImage{large extraLarge color}bannerImage studios{nodes{name}}averageScore}}
+    specific:Page(perPage:30){media(id_in:$ids,isAdult:false){id coverImage{large extraLarge}bannerImage}}
+  }`;
+  const r = await fetch('https://graphql.anilist.co',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Accept':'application/json'},
+    body:JSON.stringify({query:q,variables:{ids}})
+  });
+  if(!r.ok) throw new Error();
+  const {data} = await r.json();
+  // Build cache
+  (data.specific?.media||[]).forEach(m=>{imgCache[m.id]={cover:m.coverImage?.extraLarge||m.coverImage?.large,banner:m.bannerImage};});
+  (data.season?.media||[]).forEach(m=>{if(!imgCache[m.id])imgCache[m.id]={cover:m.coverImage?.extraLarge||m.coverImage?.large,banner:m.bannerImage};});
+  AL.seasonal = data.season?.media||[];
+  AL.hero = data.trending?.media?.[0]?.bannerImage||data.trending?.media?.[0]?.coverImage?.extraLarge||null;
+  AL.loaded = true;
+}
+
+function img(id, fallbackGrad, type='cover') {
+  const d = imgCache[id];
+  const url = type==='banner'?(d?.banner||d?.cover):d?.cover;
+  if(url) return `<img src="${url}" onerror="this.style.display='none'" loading="lazy">`;
+  return `<div style="background:${fallbackGrad};width:100%;height:100%"></div>`;
+}
+function imgStyle(id, fallbackGrad, type='cover') {
+  const d = imgCache[id];
+  const url = type==='banner'?(d?.banner||d?.cover):d?.cover;
+  if(url) return `background-image:url(${url});background-size:cover;background-position:center;`;
+  return `background:${fallbackGrad};`;
+}
+
+/* ========= ROUTER ========= */
+function go(p){window.location.hash=p;}
+function router(){
+  const hash=window.location.hash.replace('#','')||'';
+  const [page,...rest]=hash.split('/');
+  document.getElementById('app').style.animation='none';
+  document.getElementById('app').offsetHeight;
+  document.getElementById('app').style.animation='';
+  ['n0','n1','n2','n3'].forEach(id=>document.getElementById(id)?.classList.remove('on'));
+  const nm={'':'n0','articles':'n1','article':'n1','calendrier':'n2','manga-guide':'n3'};
+  document.getElementById(nm[page]||'n0')?.classList.add('on');
+  window.scrollTo(0,0);
+  if(!page)rHome();
+  else if(page==='articles')rArticles();
+  else if(page==='article')rArticle(rest[0]);
+  else if(page==='calendrier')rCalendrier();
+  else if(page==='manga-guide')rMangaGuide();
+  else rHome();
+  rFooter();
+  initPage();
+}
+window.addEventListener('hashchange',router);
+
+/* ========= HOME ========= */
+function rHome(){
+  document.getElementById('prog').style.display='none';
+  const heroStyle = AL.hero ? `background-image:url(${AL.hero});background-size:cover;background-position:center 20%;` : 'background:linear-gradient(160deg,#04040A,#0a0a1e,#1a0533,#54218E);';
+  const fa = ARTICLES['solo-leveling-s2'];
+  const strips = ['demon-slayer-finale','top-10-isekai','chainsaw-man-s2','jjk-analyse','blue-lock-ep3'];
+  const fg1 = ARTICLES['jjk-analyse'];
+  const fg2 = ARTICLES['blue-lock-ep3'];
+  const fg3 = ARTICLES['top-10-isekai'];
+
+  document.getElementById('app').innerHTML=`
+  <section class="hero">
+    <div class="hero-img" style="${heroStyle}"></div>
+    <div class="hero-ov"></div>
+    <div class="hero-orbs"><div class="orb o1"></div><div class="orb o2"></div></div>
+    <div id="pts"></div>
+    <div class="hero-cnt">
+      <div class="hbadge">Média N°1 Anime & Manga FR</div>
+      <h1>L'univers anime<br><span class="gt">& manga en français</span></h1>
+      <p>Actualités, reviews, calendrier saisonnier — tout pour les vrais fans au même endroit.</p>
+      <div class="hbtns">
+        <a class="btnp" onclick="go('articles')">Découvrir les news →</a>
+        <a class="btns" onclick="go('calendrier')">Calendrier saisonnier</a>
+      </div>
+    </div>
+    <div class="hero-anime-row">
+      ${AL.seasonal.slice(0,3).map((an,i)=>`
+      <div class="ha-card">
+        ${imgCache[an.id]?.cover?`<img src="${imgCache[an.id].cover}" onerror="this.style.display='none'" loading="lazy">`:`<div style="background:linear-gradient(160deg,#1a0533,#54218E,#D02886)"></div>`}
+        <div class="ov"></div>
+        <div class="ht">${an.title?.romaji||''}</div>
+      </div>`).join('')}
+    </div>
+    <div class="scrollhint">Scroll</div>
+  </section>
+
+  <div class="ticker">
+    <div class="tl">🔴 LIVE</div>
+    <div class="ti2">
+      <span>Demon Slayer : Saison Pilier Soleil annoncée pour octobre 2025</span>
+      <span>Solo Leveling : Le film animé confirmé pour 2026</span>
+      <span>Chainsaw Man S2 officiellement chez MAPPA</span>
+      <span>One Piece : L'arc Elbaf démarre en septembre 2025</span>
+      <span>Blue Lock S2 — Épisode 1 disponible</span>
+      <span>Re:Zero S4 confirmée lors du Japan Expo</span>
+      <span>Demon Slayer : Saison Pilier Soleil annoncée pour octobre 2025</span>
+      <span>Solo Leveling : Le film animé confirmé pour 2026</span>
+      <span>Chainsaw Man S2 officiellement chez MAPPA</span>
+      <span>One Piece : L'arc Elbaf démarre en septembre 2025</span>
+      <span>Blue Lock S2 — Épisode 1 disponible</span>
+      <span>Re:Zero S4 confirmée lors du Japan Expo</span>
+    </div>
+  </div>
+
+  <section style="background:var(--bg2)">
+    <div class="wrap">
+      <div class="sh rv"><div class="stitle">À la une <small>Les articles que tout le monde lit en ce moment</small></div><a class="seeall" onclick="go('articles')">Tout voir →</a></div>
+      <a class="ed-hero rv" onclick="go('article/${fa.slug}')">
+        <div class="bg" style="${imgStyle(fa.animeId,fa.grad,'banner')}">${imgCache[fa.animeId]?.banner?`<img src="${imgCache[fa.animeId].banner}" style="width:100%;height:100%;object-fit:cover;object-position:center 20%">`:''}
+        </div>
+        <div class="ov"></div>
+        <div class="cnt">
+          <span class="tag ${fa.tc}">${fa.tag}</span>
+          <h2>${fa.title}</h2>
+          <p class="xrp">${fa.excerpt}</p>
+          <div class="meta"><div class="av" style="background:${fa.ag}">${fa.ai}</div><span>${fa.author}</span><span>•</span><span>${fa.date}</span><span>•</span><span>${fa.rt} de lecture</span></div>
+        </div>
+      </a>
+      <div class="lstrip rv">
+        ${strips.map(s=>{const a=ARTICLES[s];return`<a class="ls" onclick="go('article/${a.slug}')"><div class="ls-img">${img(a.animeId,a.grad)}</div><div class="ls-b"><span class="tag ${a.tc}">${a.tag}</span><h4>${a.title}</h4><div class="mt">${a.date}</div></div></a>`;}).join('')}
+      </div>
+      <div class="ms">
+        <div>
+          <div class="fg rv">
+            <a class="fgm" onclick="go('article/${fg1.slug}')">
+              <div class="th">${img(fg1.animeId,fg1.grad)}</div>
+              <div class="bd"><span class="tag ${fg1.tc}">${fg1.tag}</span><h3>${fg1.title}</h3><p class="exc">${fg1.excerpt}</p><div class="mt"><div class="av" style="background:${fg1.ag}">${fg1.ai}</div><span>${fg1.author}</span><span style="color:var(--t3);margin-left:4px">• ${fg1.date}</span></div></div>
+            </a>
+            <a class="fgs" onclick="go('article/${fg2.slug}')"><div class="st">${img(fg2.animeId,fg2.grad)}</div><div class="sb"><span class="tag ${fg2.tc}">${fg2.tag}</span><h4>${fg2.title}</h4><div class="mt">${fg2.author} • ${fg2.date}</div></div></a>
+            <a class="fgs" onclick="go('article/${fg3.slug}')"><div class="st">${img(fg3.animeId,fg3.grad)}</div><div class="sb"><span class="tag ${fg3.tc}">${fg3.tag}</span><h4>${fg3.title}</h4><div class="mt">${fg3.author} • ${fg3.date}</div></div></a>
+          </div>
+        </div>
+        <div class="sidebar2">
+          <div class="sbn"><h4>Dernières nouvelles</h4>
+            ${Object.values(ARTICLES).slice(1).map(a=>`<a class="si" onclick="go('article/${a.slug}')"><span class="tag ${a.tc}">${a.tag}</span><p>${a.title}</p><div class="mt">${a.date}</div></a>`).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap"><a class="mgb rv" onclick="go('manga-guide')">
+    <div class="l"><h2>📚 Reprendre le manga après l'anime</h2><p>Tu as fini l'anime et tu veux continuer l'histoire ? Notre guide te dit exactement où reprendre pour chaque série.</p></div>
+    <div class="r"><span class="btnp" style="background:rgba(255,255,255,.18);border:2px solid rgba(255,255,255,.35);box-shadow:none;backdrop-filter:blur(8px)">Voir le guide →</span></div>
+  </a></div>
+
+  <section>
+    <div class="wrap">
+      <div class="sh rv"><div class="stitle">Derniers articles <small>Frais du jour</small></div><a class="seeall" onclick="go('articles')">Tous les articles →</a></div>
+      <div class="ag">
+        ${Object.values(ARTICLES).slice(0,6).map(a=>`
+        <a class="ac rv" onclick="go('article/${a.slug}')">
+          <div class="ac-th">${img(a.animeId,a.grad)}<div class="ac-tg"><span class="tag ${a.tc}">${a.tag}</span></div></div>
+          <div class="ac-b"><div class="ac-title">${a.title}</div><div class="ac-exc">${a.excerpt}</div>
+          <div class="ac-meta"><div class="av" style="background:${a.ag}">${a.ai}</div><span>${a.author}</span><div class="dot"></div><span>${a.date}</span><span class="rt">${a.rt}</span></div></div>
+        </a>`).join('')}
+      </div>
+    </div>
+  </section>
+
+  <section id="cal"><div class="wrap">
+    <div class="sh rv"><div class="stitle">Calendrier Printemps 2025 <small>Les animes à ne pas rater</small></div><a class="seeall" onclick="go('calendrier')">Calendrier complet →</a></div>
+    <div class="stabs rv"><button class="stab">Hiver 2025</button><button class="stab on">Printemps 2025</button><button class="stab">Été 2025</button><button class="stab">Automne 2025</button></div>
+    <div class="cscroll rv"><div class="cg">
+      ${ANIMES.map((an,i)=>{const sd=AL.seasonal[i]||{};const cid=sd.id||an.id;return`
+      <div class="anc"><div class="an-p">${img(cid,`linear-gradient(160deg,#1a0533,#54218E,#D02886)`)}<div class="an-ov"></div>${an.badge?`<span class="an-badge">${an.badge}</span>`:''}<span class="an-day">${an.day}</span>${sd.averageScore?`<span class="an-score">${(sd.averageScore/10).toFixed(1)}</span>`:''}</div>
+      <div class="an-i"><div class="an-t">${sd.title?.romaji||an.title}</div><div class="an-s">${sd.studios?.nodes?.[0]?.name||an.studio}</div><div class="gps">${an.genres.map(g=>`<span class="gp">${g}</span>`).join('')}</div></div></div>`;}).join('')}
+    </div></div>
+  </div></section>
+
+  <section><div class="wrap">
+    <div class="sh rv"><div class="stitle">Explorer par genre</div></div>
+    <div class="catg">
+      ${[['c1','⚡','Shonen','248'],['c2','🌀','Isekai','186'],['c3','🎭','Seinen','124'],['c4','💕','Romance','97'],['c5','🔥','Action','312'],['c6','✨','Fantasy','143']].map(([c,i,n,ct])=>`<div class="ccat ${c} rv"><div class="ci">${i}</div><span class="cname">${n}</span><span class="ccnt">${ct} articles</span></div>`).join('')}
+    </div>
+  </div></section>
+
+  <section id="nl"><div class="nl-bg"></div><div class="wrap"><div class="nl-w rv">
+    <div class="hbadge" style="margin:0 auto 22px">50 000+ fans</div>
+    <h2>Ne rate plus <span class="gt">aucune news</span></h2>
+    <p>Reçois chaque semaine les meilleures actus anime & manga et les analyses exclusives d'INKU.</p>
+    <div class="nform" id="nlf"><input type="email" id="nle" placeholder="ton@email.com"><button onclick="nlSub()">S'abonner</button></div>
+    <div class="nlok" id="nlok"><div class="ck">✓</div><div><strong>Bienvenue dans la famille INKU ! 🎉</strong><p style="color:var(--t2);font-size:14px;margin-top:5px">Vérifie ta boîte mail.</p></div></div>
+    <p class="nlnote">Aucun spam. Désabonnement en 1 clic.</p>
+  </div></div></section>`;
+  initPts();
+}
+
+/* ========= ARTICLES LIST ========= */
+function rArticles(){
+  document.getElementById('prog').style.display='none';
+  document.getElementById('app').innerHTML=`
+  <div style="padding-top:100px;background:var(--bg2);padding-bottom:40px;position:relative;overflow:hidden;">
+    <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 100%,rgba(84,33,142,.25) 0%,transparent 65%)"></div>
+    <div class="wrap" style="position:relative;z-index:2;"><h1 style="font-size:clamp(32px,5vw,56px);margin-bottom:10px;">Actualités</h1><p style="color:var(--t2);">Toutes les news, reviews et analyses de l'équipe INKU</p></div>
+  </div>
+  <section><div class="wrap"><div class="ag">
+    ${Object.values(ARTICLES).map(a=>`
+    <a class="ac rv" onclick="go('article/${a.slug}')">
+      <div class="ac-th">${img(a.animeId,a.grad)}<div class="ac-tg"><span class="tag ${a.tc}">${a.tag}</span></div></div>
+      <div class="ac-b"><div class="ac-title">${a.title}</div><div class="ac-exc">${a.excerpt}</div>
+      <div class="ac-meta"><div class="av" style="background:${a.ag}">${a.ai}</div><span>${a.author}</span><div class="dot"></div><span>${a.date}</span><span class="rt">${a.rt}</span></div></div>
+    </a>`).join('')}
+  </div></div></section>`;
+}
+
+/* ========= ARTICLE ========= */
+function rArticle(slug){
+  const a=ARTICLES[slug];
+  if(!a){rHome();return;}
+  document.getElementById('prog').style.display='block';
+  document.getElementById('prog').style.width='0';
+  const related=Object.values(ARTICLES).filter(x=>x.slug!==slug).slice(0,3);
+  document.getElementById('app').innerHTML=`
+  <div class="art-hero">
+    <div class="bg" style="${imgStyle(a.animeId,a.grad,'banner')}">${imgCache[a.animeId]?.banner?`<img src="${imgCache[a.animeId].banner}" style="width:100%;height:100%;object-fit:cover;object-position:center 20%">`:''}
+    </div>
+    <div class="ov"></div>
+    <div class="art-mt"><div class="wrap">
+      <span class="tag ${a.tc}">${a.tag}</span>
+      <h1>${a.title}</h1>
+      <p class="art-sub">${a.subtitle}</p>
+      <div class="art-info"><div class="av" style="background:${a.ag}">${a.ai}</div><span class="aname">${a.author}</span><span class="sep">•</span><span>${a.date}</span><span class="sep">•</span><span>${a.rt} de lecture</span></div>
+    </div></div>
+  </div>
+  <div class="wrap"><div class="abw">
+    <div class="ab">
+      ${a.content}
+      ${a.score?`<div class="score-box"><div class="score-n">${a.score}</div><div class="score-i"><h4>Notre verdict</h4><p>${a.excerpt}</p><div class="st">${'★'.repeat(Math.round(a.score/2))}${'☆'.repeat(5-Math.round(a.score/2))}</div></div></div>`:''}
+      <div class="art-tags">${['Anime','Review','2025','Shonen'].map(t=>`<span class="art-tag">#${t}</span>`).join('')}</div>
+      <div class="acard"><div class="abig" style="background:${a.ag}">${a.ai}</div><div><h4>${a.author}</h4><p>${a.abio}</p></div></div>
+      <div class="rbot"><h3>À lire aussi</h3><div class="rbg">
+        ${related.map(r=>`<a class="ac" onclick="go('article/${r.slug}')"><div class="ac-th">${img(r.animeId,r.grad)}<div class="ac-tg"><span class="tag ${r.tc}">${r.tag}</span></div></div><div class="ac-b"><div class="ac-title">${r.title}</div><div class="ac-meta"><div class="av" style="background:${r.ag}">${r.ai}</div><span>${r.author}</span><span class="rt">${r.rt}</span></div></div></a>`).join('')}
+      </div></div>
+    </div>
+    <div class="art-aside"><div class="ast">
+      <div class="toc"><h5>Dans cet article</h5><ul>${a.toc.map(t=>`<li><a href="#">${t}</a></li>`).join('')}</ul></div>
+      <div class="rbox"><h5>Articles similaires</h5>
+        ${related.map(r=>`<a class="ri" onclick="go('article/${r.slug}')"><div class="rith">${img(r.animeId,r.grad)}</div><p>${r.title}</p><div class="mt">${r.date}</div></a>`).join('')}
+      </div>
+    </div></div>
+  </div></div>
+  <div style="height:80px"></div>`;
+  window.addEventListener('scroll',updProg,{passive:true});
+}
+
+function updProg(){
+  const b=document.getElementById('prog');
+  if(b.style.display==='none')return;
+  const tot=Math.max(document.body.scrollHeight,document.documentElement.scrollHeight)-window.innerHeight;
+  b.style.width=Math.min((window.scrollY/tot)*100,100)+'%';
+}
+
+/* ========= CALENDRIER ========= */
+function rCalendrier(){
+  document.getElementById('prog').style.display='none';
+  document.getElementById('app').innerHTML=`
+  <div style="padding-top:100px;background:var(--bg2);padding-bottom:40px;position:relative;overflow:hidden;">
+    <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 110%,rgba(84,33,142,.28) 0%,transparent 65%)"></div>
+    <div class="wrap" style="position:relative;z-index:2;"><h1 style="font-size:clamp(34px,5vw,58px);margin-bottom:10px;">Calendrier Saisonnier</h1><p style="color:var(--t2);">Tous les animes qui sortent chaque saison</p></div>
+  </div>
+  <section><div class="wrap">
+    <div class="stabs rv"><button class="stab">Hiver 2025</button><button class="stab on">Printemps 2025</button><button class="stab">Été 2025</button><button class="stab">Automne 2025</button></div>
+    <div class="cscroll rv"><div class="cg">
+      ${ANIMES.map((an,i)=>{const sd=AL.seasonal[i]||{};const cid=sd.id||an.id;return`
+      <div class="anc"><div class="an-p">${img(cid,`linear-gradient(160deg,#1a0533,#54218E,#D02886)`)}<div class="an-ov"></div>${an.badge?`<span class="an-badge">${an.badge}</span>`:''}<span class="an-day">${an.day}</span>${sd.averageScore?`<span class="an-score">${(sd.averageScore/10).toFixed(1)}</span>`:''}</div>
+      <div class="an-i"><div class="an-t">${sd.title?.romaji||an.title}</div><div class="an-s">${sd.studios?.nodes?.[0]?.name||an.studio}</div><div class="gps">${an.genres.map(g=>`<span class="gp">${g}</span>`).join('')}</div></div></div>`;}).join('')}
+    </div></div>
+  </div></section>`;
+}
+
+/* ========= MANGA GUIDE ========= */
+function rMangaGuide(){
+  document.getElementById('prog').style.display='none';
+  document.getElementById('app').innerHTML=`
+  <div class="mg-h"><div class="wrap">
+    <div class="hbadge" style="margin:0 auto 20px">Guide exclusif INKU</div>
+    <h1>📚 Reprendre le manga<br><span class="gt">après l'anime</span></h1>
+    <p>Tu as fini l'anime et tu veux continuer ? Voici exactement où commencer pour chaque série, sans te perdre.</p>
+    <div class="mgf rv">
+      <button class="mf on">Tous</button><button class="mf">Action</button><button class="mf">Isekai</button><button class="mf">Seinen</button><button class="mf">Shonen</button>
+    </div>
+  </div></div>
+  <section><div class="wrap"><div class="mgg">
+    ${MANGA_GUIDES.map(g=>`
+    <div class="mgc rv">
+      <div class="mg-pos">${img(g.animeId,`linear-gradient(160deg,#1a0533,#54218E,#D02886)`)}<div class="ov"></div><div class="letter">${g.id.toUpperCase()}</div></div>
+      <div class="mg-i">
+        <div class="mg-an">${g.anime}</div>
+        <div class="mg-mn">${g.manga}</div>
+        <div style="font-size:12px;color:var(--t3);margin-bottom:8px">${g.ep}</div>
+        <hr class="mg-div">
+        <div class="mg-row"><span class="lb">Commencer</span><span class="vl">${g.start}</span></div>
+        <div class="mg-row"><span class="lb">Volume</span><span class="vl">${g.vol}</span></div>
+        <div class="mg-row"><span class="lb">Éditeur FR</span><span class="vl" style="color:var(--t2);font-weight:500">${g.pub}</span></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px">
+          <span class="mg-st ${g.status}">${g.status==='done'?'✓ Terminé':'● En cours'}</span>
+          <span style="font-size:11px;color:var(--t3)">${g.total} ch.</span>
+        </div>
+        <p class="mg-exc">${g.exc}</p>
+      </div>
+    </div>`).join('')}
+  </div></div></section>`;
+}
+
+/* ========= FOOTER ========= */
+function rFooter(){
+  document.getElementById('foot').innerHTML=`<div class="wrap">
+    <div class="fgrid">
+      <div class="fb"><div class="logo" style="font-size:30px">INKU</div><p>Le média de référence pour les fans d'anime et manga francophones.</p>
+        <div class="soc"><a class="sbtn">📸</a><a class="sbtn">🎵</a><a class="sbtn">𝕏</a><a class="sbtn">💬</a><a class="sbtn">▶</a></div>
+      </div>
+      <div class="fc"><h5>Navigation</h5><ul><li><a onclick="go('')">Accueil</a></li><li><a onclick="go('articles')">Actualités</a></li><li><a onclick="go('calendrier')">Calendrier</a></li><li><a onclick="go('manga-guide')">Guide Manga</a></li></ul></div>
+      <div class="fc"><h5>INKU</h5><ul><li><a>À Propos</a></li><li><a>L'Équipe</a></li><li><a>Partenariats</a></li><li><a>Contact</a></li></ul></div>
+      <div class="fc"><h5>Légal</h5><ul><li><a>Mentions légales</a></li><li><a>Confidentialité</a></li><li><a>CGU</a></li><li><a>Cookies</a></li></ul></div>
+    </div>
+    <div class="fbot"><span>© 2025 INKU — Fait avec <span class="heart">♥</span> par des fans, pour des fans</span><div class="logo" style="font-size:22px">INKU</div><span>Tous droits réservés</span></div>
+  </div>`;
+}
+
+/* ========= INIT ========= */
+function initPage(){
+  const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('on');});},{threshold:.07,rootMargin:'0px 0px -30px 0px'});
+  document.querySelectorAll('.rv').forEach(el=>obs.observe(el));
+  document.querySelectorAll('a,button,.ac,.anc,.mgc,.ccat,.ls,.fgm,.fgs,.si,.ri,.ed-hero,.mgb').forEach(el=>{
+    el.addEventListener('mouseenter',()=>document.getElementById('cr').classList.add('h'));
+    el.addEventListener('mouseleave',()=>document.getElementById('cr').classList.remove('h'));
+  });
+  document.querySelectorAll('.stab,.mf').forEach(t=>{t.addEventListener('click',function(){
+    this.closest('.stabs,.mgf').querySelectorAll('.stab,.mf').forEach(x=>x.classList.remove('on'));
+    this.classList.add('on');
+  });});
+  window.addEventListener('scroll',()=>{document.getElementById('hdr').classList.toggle('sc',window.scrollY>20);},{passive:true});
+}
+
+function initPts(){
+  const c=document.getElementById('pts');if(!c)return;
+  const colors=['#FF3399','#D02886','#9966CC','#FF5FB3'];
+  for(let i=0;i<24;i++){
+    const p=document.createElement('div');p.className='pt';
+    const sz=Math.random()*4+2,col=colors[Math.floor(Math.random()*colors.length)];
+    p.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;background:${col};box-shadow:0 0 ${sz*3}px ${col};--d:${(Math.random()*8+5).toFixed(1)}s;--tx:${(Math.random()*80-40).toFixed(0)}px;--ty:-${(Math.random()*100+40).toFixed(0)}px;--op:${(Math.random()*.5+.25).toFixed(2)};animation-delay:-${(Math.random()*10).toFixed(1)}s;`;
+    c.appendChild(p);
+  }
+}
+
+/* CURSOR */
+const cd=document.getElementById('cd'),cr=document.getElementById('cr');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cd.style.transform=`translate(${mx-5}px,${my-5}px)`;});
+(function aR(){rx+=(mx-rx)*.13;ry+=(my-ry)*.13;cr.style.transform=`translate(${rx-20}px,${ry-20}px)`;requestAnimationFrame(aR);})();
+
+/* THEME */
+function toggleTheme(){const h=document.documentElement;h.dataset.theme=h.dataset.theme==='dark'?'light':'dark';localStorage.setItem('iku-t',h.dataset.theme);}
+const sv=localStorage.getItem('iku-t');if(sv)document.documentElement.dataset.theme=sv;
+
+/* MOBILE MENU */
+function openMM(){document.getElementById('mm').classList.add('open');}
+function closeMM(){document.getElementById('mm').classList.remove('open');}
+
+/* NEWSLETTER */
+function nlSub(){const v=document.getElementById('nle')?.value;if(!v||!v.includes('@'))return;document.getElementById('nlf').style.display='none';document.getElementById('nlok').style.display='flex';}
+
+/* ========= BOOT ========= */
+async function boot(){
+  // Try loading real images
+  try { await Promise.race([fetchAniList(), new Promise((_,r)=>setTimeout(r,3000))]); }
+  catch(e){ console.log('Using gradient fallbacks'); }
+  // Hide splash & start
+  const sp=document.getElementById('splash');
+  sp.classList.add('hide');
+  setTimeout(()=>{sp.remove();},700);
+  // Init routing
+  window.addEventListener('hashchange',router);
+  router();
+}
+boot();
+</script>
+</body>
+</html>
